@@ -16,7 +16,7 @@ export const Directorio = () => {
   const [nosotros, setNosotros] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  useTitle("Directorio");
+  useTitle("Patistas");
 
   useEffect(() => {
     fetch("/data/nosotros.json")
