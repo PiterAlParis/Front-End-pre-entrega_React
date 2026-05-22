@@ -1,6 +1,7 @@
 import React from "react";
 import { Nav } from "../../Nav/Nav";
-import './Header.css';
+import "./Header.css";
+import "../../assets/logo.png"
 
 export default function Header() {
 	return (
