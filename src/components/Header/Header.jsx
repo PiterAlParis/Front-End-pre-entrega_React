@@ -1,10 +1,14 @@
 import React from "react";
 import { Nav } from "../../Nav/Nav";
+import './Header.css';
 
 export default function Header() {
 	return (
-		<header style={{padding: '1rem', background: '#f5f5f5', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-			<h1 style={{margin:0}}>Mi tienda</h1>
+		<header className="header">
+			<div className="header-brand">
+				<img src="/logo.png" alt="Logo Mi tienda" className="header-logo" />
+				<h1>Mi tienda</h1>
+			</div>
 			<Nav />
 		</header>
 	);
