@@ -7,11 +7,10 @@ export default function Header() {
 	return (
 		<header className="header">
 			<div className="header-brand">
-				<img src=¨{logoPatistas} />
-				<h1>Patistas</h1>
+				<img src={logoPatitas} alt="Logo Patitas" className="header-logo" />
+				<h1>Patitas</h1>
 			</div>
 			<Nav />
 		</header>
 	);
 }
-
