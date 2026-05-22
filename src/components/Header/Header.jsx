@@ -7,7 +7,7 @@ export default function Header() {
 		<header className="header">
 			<div className="header-brand">
 				<img src="/logo.png" alt="Logo Mi tienda" className="header-logo" />
-				<h1>Mi tienda</h1>
+				<h1>Patistas</h1>
 			</div>
 			<Nav />
 		</header>
