@@ -1,0 +1,19 @@
+.contenedor-tarjetas {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.tarjeta {
+  width: 200px;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: #2a1e35;
+  color: white;
+  text-align: center;
+}
+
+.tarjeta img {
+  width: 100%;
+  border-radius: 50%;
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nombre": "Ana Pérez",
+    "email": "ana.perez@example.com",
+    "puesto": "CEO",
+    "foto": "/src/assets/img/Adulto_01.jpg"
+  },
+  {
+    "id": 2,
+    "nombre": "Luis Gómez",
+    "email": "luis.gomez@example.com",
+    "puesto": "Criador",
+    "foto": "/src/assets/img/Adulto_02.jpg"
+  },
+  {
+    "id": 3,
+    "nombre": "María Ruiz",
+    "email": "maria.ruiz@example.com",
+    "puesto": "Veterinaria",
+    "foto": "/src/assets/img/Adulto_03.jpg"
+  }
+]

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carrito</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f8f9fb; color: #222; }
+      .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
+      header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+      h1 { margin: 0; font-size: 1.9rem; }
+      .meta { color: #555; }
+      .cart-count { font-weight: 700; }
+      .mini-list { display: grid; gap: 16px; }
+      .mini-item { display: grid; grid-template-columns: 110px 1fr auto; gap: 16px; padding: 16px; border: 1px solid #ddd; border-radius: 10px; background: #fafbfc; }
+      .mini-item img { width: 110px; height: 110px; object-fit: cover; border-radius: 10px; }
+      .mini-info { display: grid; gap: 8px; }
+      .mini-info h2 { margin: 0; font-size: 1.1rem; }
+      .mini-info p { margin: 0; color: #555; }
+      .mini-total { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; padding: 16px; border-radius: 10px; background: #eef2f7; }
+      button { border: none; border-radius: 8px; padding: 12px 18px; font-size: .95rem; cursor: pointer; }
+      .btn-back { background: #e2e8f0; color: #111; }
+      .btn-finish { background: #2f6df2; color: #fff; }
+      .empty { text-align: center; padding: 40px 0; color: #666; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div>
+          <h1>Carrito de compras</h1>
+          <div class="meta">
+            Productos agregados: <span class="cart-count">0</span>
+          </div>
+        </div>
+        <div>
+          <button class="btn-back" id="btn-back">Volver</button>
+          <button class="btn-clear" id="btn-clear">Vaciar carrito</button>
+          <button class="btn-finish" id="btn-finish">Finalizar compra</button>
+        </div>
+      </header>
+
+      <div id="cart-items" class="mini-list"></div>
+      <div id="cart-empty" class="empty" style="display:none;">
+        No hay productos en el carrito.
+      </div>
+      <div id="cart-summary" class="mini-total" style="display:none;">
+        <div>Total</div>
+        <div id="cart-total">$0</div>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = 'mi_refugio_carrito_v1';
+      const cartItemsEl = document.getElementById('cart-items');
+      const cartCountEl = document.querySelector('.cart-count');
+      const cartTotalEl = document.getElementById('cart-total');
+      const cartEmptyEl = document.getElementById('cart-empty');
+      const cartSummaryEl = document.getElementById('cart-summary');
+      const btnBack = document.getElementById('btn-back');
+      const btnClear = document.getElementById('btn-clear');
+      const btnFinish = document.getElementById('btn-finish');
+
+      // Known products map to correct legacy/incorrect entries by id
+      const PRODUCTS_MAP = {
+        1: { id: 1, nombre: 'Mini Akita', descripcion: 'descripcion 1', precio: 123456, img: '/src/assets/img/Adulto_01.jpg' },
+        2: { id: 2, nombre: 'Border Collie', descripcion: 'descripcion 2', precio: 1654, img: '/src/assets/img/Adulto_02.jpg' },
+        3: { id: 3, nombre: 'Pastor Australiano', descripcion: 'descripcion 3', precio: 4221, img: '/src/assets/img/Adulto_03.jpg' },
+      };
+
+      function loadCart() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const arr = raw ? JSON.parse(raw) : [];
+
+          // Migration: if items lack correct fields or have wrong names, fix from PRODUCTS_MAP when possible
+          let changed = false;
+          const fixed = arr.map(item => {
+            const id = Number(item.id);
+            const proto = PRODUCTS_MAP[id];
+            if (proto) {
+              const newItem = {
+                id: proto.id,
+                nombre: proto.nombre,
+                precio: Number(item.precio ?? proto.precio),
+                descripcion: item.descripcion ?? proto.descripcion,
+                img: item.img ?? proto.img,
+                cantidad: Number(item.cantidad || 1),
+              };
+              // detect mismatch
+              if (String(item.nombre) !== String(newItem.nombre) || String(item.img) !== String(newItem.img)) changed = true;
+              return newItem;
+            }
+            // normalize fields
+            return {
+              id: item.id,
+              nombre: item.nombre ?? '',
+              precio: Number(item.precio ?? 0),
+              descripcion: item.descripcion ?? '',
+              img: item.img ?? '',
+              cantidad: Number(item.cantidad || 1),
+            };
+          });
+
+          if (changed) saveCart(fixed);
+          return fixed;
+        } catch {
+          return [];
+        }
+      }
+
+      function saveCart(cart) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+        } catch {}
+      }
+
+      function updateCartView() {
+        const cart = loadCart();
+        const totalCount = cart.reduce((sum, item) => sum + Number(item.cantidad || 0), 0);
+        const totalPrice = cart.reduce((sum, item) => sum + Number(item.precio || 0) * Number(item.cantidad || 0), 0);
+
+        cartCountEl.textContent = totalCount;
+        cartTotalEl.textContent = '$' + totalPrice.toLocaleString();
+
+        if (!cart.length) {
+          cartItemsEl.innerHTML = '';
+          cartEmptyEl.style.display = 'block';
+          cartSummaryEl.style.display = 'none';
+          return;
+        }
+
+        cartEmptyEl.style.display = 'none';
+        cartSummaryEl.style.display = 'flex';
+
+        cartItemsEl.innerHTML = cart.map(item => {
+          const foto = item.img || '/src/assets/img/Adulto_01.jpg';
+          return `
+            <div class="mini-item">
+              <img src="${foto}" alt="${item.nombre}" />
+              <div class="mini-info">
+                <h2>${item.nombre}</h2>
+                <p>${item.descripcion || 'Producto agregado al carrito.'}</p>
+                <p>Cantidad: ${item.cantidad}</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:.5rem;flex-direction:column;justify-content:center;">
+                <div style="font-weight:700;">$${(Number(item.precio) * Number(item.cantidad)).toLocaleString()}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      btnBack.addEventListener('click', () => window.close());
+      btnClear.addEventListener('click', () => {
+        const cart = loadCart();
+        if (!cart.length) {
+          alert('El carrito ya está vacío.');
+          return;
+        }
+        if (confirm('¿Deseas vaciar todo el carrito?')) {
+          saveCart([]);
+          updateCartView();
+        }
+      });
+      btnFinish.addEventListener('click', () => {
+        const cart = loadCart();
+        if (!cart.length) {
+          alert('El carrito está vacío');
+          return;
+        }
+        alert('Compra finalizada con éxito.');
+        saveCart([]);
+        updateCartView();
+      });
+
+      window.addEventListener('storage', () => updateCartView());
+      window.addEventListener('focus', updateCartView);
+      window.addEventListener('pageshow', updateCartView);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) updateCartView();
+      });
+      setInterval(updateCartView, 1000);
+      updateCartView();
+    </script>
+  </body>
+</html>
